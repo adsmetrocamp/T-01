@@ -1,0 +1,17 @@
+AVALIAÇÃO
+----------
+
+
+T-01 ( 2.0 pontos )
+
+Nota.... 1.25 pts
+
+No diagram os casos de uso poderiam ter os números para facilitar a identificação.
+
+No descritivo do UC05 Comprar ingresso, no fluxo básico tem relacionamento com UC04 - Consultar/selecionar evento; <<include>> UC06 - Fornecer dados financeiros; <<include>>
+UC07 – Efetuar pagamento, porém esse relacionamento não etá representado no diagrama
+
+Somente um diagrama de sequencia foi entregue.
+
+
+
