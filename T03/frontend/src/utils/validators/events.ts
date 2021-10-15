@@ -30,6 +30,7 @@ export const eventRegisterSchema: SchemaOf<EventRegisterFormType> = yup
         price: yup.number().positive().label('Preço').required().defined(),
         eventDate: yup
             .date()
+            .required()
             .min(
                 moment().add(1, 'd').toDate(),
                 'A data do evento deve ser pelo menos 1 dia após hoje'

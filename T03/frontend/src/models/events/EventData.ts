@@ -9,7 +9,7 @@ export class EventData {
     category!: EventCategory;
     availableTickets?: number;
     totalParticipants?: number;
-    imageUri?: string;
+    image?: string;
     createdBy?: string;
     createdAt?: Date;
 }

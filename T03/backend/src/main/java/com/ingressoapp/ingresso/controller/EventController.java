@@ -1,8 +1,8 @@
 package com.ingressoapp.ingresso.controller;
 
-import com.ingressoapp.ingresso.dto.EventCategoryDto;
 import com.ingressoapp.ingresso.dto.EventRequest;
 import com.ingressoapp.ingresso.dto.EventResponse;
+import com.ingressoapp.ingresso.dto.SimpleEventResponse;
 import com.ingressoapp.ingresso.model.Event;
 import com.ingressoapp.ingresso.model.EventCategory;
 import com.ingressoapp.ingresso.repository.EventCategoryRepository;
@@ -29,9 +29,20 @@ public class EventController {
     private EventRepository eventRepository;
 
     @GetMapping()
-    private List<EventCategoryDto> getAllEvents() {
-        return eventCategoryRepository.findAll().stream().map(EventCategoryDto::toResponse)
+    private List<SimpleEventResponse> getAllEvents() {
+        return eventRepository.findAllByOrderByCreatedAtDesc().stream().map(SimpleEventResponse::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}")
+    private EventResponse getEventById(@PathVariable("id") UUID id) {
+        Optional<Event> findEventById = eventRepository.findById(id);
+
+        if (!findEventById.isPresent()) {
+            throw new ValidationException("Não foi possível encontrar o evento de ID " + id);
+        }
+
+        return EventResponse.toResponse(findEventById.get());
     }
 
     @PostMapping()

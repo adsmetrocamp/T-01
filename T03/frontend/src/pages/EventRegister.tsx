@@ -35,6 +35,13 @@ import htmlToDraft from 'html-to-draftjs';
 import { eventRegisterSchema } from '../utils/validators/events';
 import useSWR from 'swr';
 import EventCategoryService from '../services/EventCategoryService';
+import EventService from '../services/EventService';
+import ErrorHandler from '../utils/ErrorHandler';
+import { useToast } from '@chakra-ui/react';
+import FileUtils from '../utils/FIleUtils';
+import { useHistory } from 'react-router';
+import { mutate } from 'swr';
+import moment from 'moment';
 
 interface Props {}
 
@@ -44,11 +51,45 @@ export const EventRegister = (props: Props) => {
         async () => (await EventCategoryService.getAllCategories()).data
     );
 
+    const history = useHistory();
+
+    const toast = useToast();
+
     const registerEventForm = useFormik<EventRegisterFormType>({
         initialValues: new EventRegisterFormType(),
-        onSubmit: () => {},
+        onSubmit: submitEvent,
         validationSchema: eventRegisterSchema,
     });
+
+    async function submitEvent(event: EventRegisterFormType) {
+        try {
+            const eventResponse = await EventService.createEvent({
+                ...event,
+                image: (await FileUtils.toBase64(
+                    event.image as File
+                )) as string,
+            });
+
+            toast({
+                title: 'Novo Evento',
+                description: 'O Evento foi cadastrado com sucesso',
+                status: 'success',
+            });
+
+            mutate<EventData[]>('/events', (ev) =>
+                ev ? [...ev, eventResponse.data] : undefined
+            );
+
+            mutate<EventData>(
+                `/events/${eventResponse.data.id}`,
+                () => eventResponse.data
+            );
+
+            return history.push('/');
+        } catch (err) {
+            ErrorHandler.handleError(err);
+        }
+    }
 
     const onDropEventThumbnail = useCallback((files) => {
         if (files[0]) {
@@ -215,6 +256,9 @@ export const EventRegister = (props: Props) => {
                                             e
                                         )
                                     }
+                                    minDate={moment(new Date())
+                                        .add(1, 'd')
+                                        .toDate()}
                                     placeholderText="Selecione a data do evento"
                                     calendarStartDay={2}
                                     customInput={
@@ -292,7 +336,11 @@ export const EventRegister = (props: Props) => {
                     <FormLabel mt={5}>Sobre o Evento</FormLabel>
                     <Box
                         borderWidth={0.5}
-                        borderColor="gray.100"
+                        borderColor={
+                            registerEventForm.errors.about
+                                ? 'red.600'
+                                : 'gray.100'
+                        }
                         borderRadius={5}
                     >
                         <Editor
@@ -320,6 +368,12 @@ export const EventRegister = (props: Props) => {
                         />
                     </Box>
 
+                    {registerEventForm.errors.about && (
+                        <Text color="red.600" mt={1}>
+                            {registerEventForm.errors.about}
+                        </Text>
+                    )}
+
                     <Button
                         variant="solid"
                         px={5}
@@ -330,6 +384,8 @@ export const EventRegister = (props: Props) => {
                         _hover={{ bg: 'purple.700' }}
                         rightIcon={<FontAwesomeIcon icon={faCheck} />}
                         disabled={!registerEventForm.isValid}
+                        isLoading={registerEventForm.isSubmitting}
+                        isDisabled={registerEventForm.isSubmitting}
                     >
                         Salvar evento
                     </Button>

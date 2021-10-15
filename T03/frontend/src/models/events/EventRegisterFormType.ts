@@ -8,5 +8,5 @@ export class EventRegisterFormType {
     categoryId!: string;
     totalTickets?: number;
     about: string = '';
-    image?: File;
+    image?: File | string;
 }

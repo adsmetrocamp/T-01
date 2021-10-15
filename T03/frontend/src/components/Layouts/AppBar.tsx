@@ -49,7 +49,7 @@ export const AppBar = (props: Props) => {
             alignItems="center"
             justifyContent="space-between"
             pl={10}
-            zIndex={99}
+            zIndex={99999}
         >
             <Box display="flex">
                 <Box mr={10} alignSelf="center">
@@ -85,23 +85,23 @@ export const AppBar = (props: Props) => {
             </Box>
 
             <Box display="flex" alignItems="center" height="100%">
-                <RouterLink to="/event/register">
-                    <Button
-                        variant="solid"
-                        px={5}
-                        mr={3}
-                        bg="purple.500"
-                        color="white"
-                        type="submit"
-                        _hover={{ bg: 'purple.700' }}
-                        rightIcon={<FontAwesomeIcon icon={faPlus} />}
-                    >
-                        Criar novo evento
-                    </Button>
-                </RouterLink>
-
                 {auth.loggedUser && (
                     <>
+                        <RouterLink to="/event/register">
+                            <Button
+                                variant="solid"
+                                px={5}
+                                mr={3}
+                                bg="purple.500"
+                                color="white"
+                                type="submit"
+                                _hover={{ bg: 'purple.700' }}
+                                rightIcon={<FontAwesomeIcon icon={faPlus} />}
+                            >
+                                Criar novo evento
+                            </Button>
+                        </RouterLink>
+
                         <Menu>
                             <MenuButton
                                 px={4}

@@ -5,3 +5,7 @@
 body {
   background-color: #f8f7fa !important;
 }
+
+.react-datepicker-popper {
+  z-index: 999 !important;
+}

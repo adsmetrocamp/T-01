@@ -29,6 +29,7 @@ public class EventRequest {
     @Future
     private Date eventDate;
 
+    @NotNull
     private String image;
 
     @NotNull

@@ -41,7 +41,12 @@ public class EventResponse {
         eventResponse.setEventDate(event.getEventDate());
         eventResponse.setImage(event.getImage());
         eventResponse.setCategory(EventCategoryDto.toResponse(event.getCategory()));
-        eventResponse.setCreatedByUser(event.getCreatedByUser().getName());
+        eventResponse.setCreatedAt(event.getCreatedAt());
+        eventResponse.setAbout(event.getAbout());
+
+        if(event.getCreatedByUser() != null) {
+            eventResponse.setCreatedByUser(event.getCreatedByUser().getName());
+        }
 
         return eventResponse;
     }

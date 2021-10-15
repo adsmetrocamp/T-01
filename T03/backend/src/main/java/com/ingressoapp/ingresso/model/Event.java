@@ -43,7 +43,7 @@ public class Event {
     @Column(nullable = false)
     private String about;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String image;
 
     @CreationTimestamp
