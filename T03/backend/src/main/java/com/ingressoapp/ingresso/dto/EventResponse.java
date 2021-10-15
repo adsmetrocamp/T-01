@@ -28,7 +28,7 @@ public class EventResponse {
 
     private Date createdAt;
 
-    private String createdByUser;
+    private SimpleUserResponse createdByUser;
 
     public static EventResponse toResponse(Event event) {
         EventResponse eventResponse = new EventResponse();
@@ -45,7 +45,7 @@ public class EventResponse {
         eventResponse.setAbout(event.getAbout());
 
         if(event.getCreatedByUser() != null) {
-            eventResponse.setCreatedByUser(event.getCreatedByUser().getName());
+            eventResponse.setCreatedByUser(SimpleUserResponse.toResponse(event.getCreatedByUser()));
         }
 
         return eventResponse;

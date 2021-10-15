@@ -18,13 +18,19 @@ interface AuthContextTypes {
 
 const AuthContext = createContext<AuthContextTypes>({} as AuthContextTypes);
 
-const AUTH_STORAGE_KEY = '@auth';
+export const AUTH_STORAGE_KEY = '@auth';
 const AUTH_CRYPT_KEY = '9044ba76-216d-11ec-9621-0242ac130002';
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: ReactNode }> & {
+    userData?: UserLoginResponse | null;
+} = ({ children }) => {
     const [loggedUser, setLoggedUser] = useState<UserLoginResponse | null>(
         null
     );
+
+    useEffect(() => {
+        AuthProvider.userData = loggedUser;
+    }, [loggedUser]);
 
     useEffect(() => {
         const storagedUser: string | null =
@@ -66,6 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             {children}
         </AuthContext.Provider>
     );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);

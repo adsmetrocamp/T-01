@@ -1,5 +1,7 @@
 import { Button } from '@chakra-ui/button';
 import { Box, Divider, Grid, Heading, Text } from '@chakra-ui/layout';
+import { SkeletonText } from '@chakra-ui/react';
+import { Skeleton } from '@chakra-ui/skeleton';
 import {
     faMoneyBill,
     faUsers,
@@ -11,7 +13,7 @@ import React from 'react';
 import { EventData } from '../../models/events/EventData';
 
 interface Props {
-    eventData: EventData;
+    eventData?: EventData;
 }
 
 export const EventInformationContainer = ({ eventData }: Props) => {
@@ -29,11 +31,13 @@ export const EventInformationContainer = ({ eventData }: Props) => {
             <Box display="flex" bgColor="#ECEFF1">
                 <Box width="70%" height={'500px'}>
                     <Box
-                        bgImage={`url(${eventData.image})`}
+                        bgImage={`url(${eventData?.image})`}
                         height={'100%'}
                         bgSize="cover"
                         bgPosition="center center"
-                    />
+                    >
+                        {!eventData && <Skeleton width="100%" height="100%" />}
+                    </Box>
                 </Box>
 
                 <Box width="30%">
@@ -44,6 +48,10 @@ export const EventInformationContainer = ({ eventData }: Props) => {
                         height="100%"
                     >
                         <Box flex={1}>
+                            {!eventData && (
+                                <Skeleton mb={10} height={3} width={'80%'} />
+                            )}
+
                             <Text
                                 size="md"
                                 color="purple.500"
@@ -51,53 +59,68 @@ export const EventInformationContainer = ({ eventData }: Props) => {
                                 mb={2}
                                 fontSize="13"
                             >
-                                {moment(eventData.eventDate).format('llll')}
+                                {eventData &&
+                                    moment(eventData?.eventDate).format('llll')}
                             </Text>
 
                             <Heading size="lg" color="gray.600" mt={4}>
-                                {eventData.name}
+                                {eventData?.name}
                             </Heading>
 
-                            <Text mt={3}>
-                                Lorem ipsum dolor sit amet consectetur
-                                adipisicing elit. Maiores inventore consequatur
-                                ab tempore sequi quod accusamus provident fugit,
-                                reprehenderit eligendi, libero ipsum doloribus
-                                necessitatibus totam ut quia voluptate vitae
-                                animi?
-                            </Text>
+                            {!eventData && (
+                                <>
+                                    <SkeletonText mt={3}></SkeletonText>
+                                    <SkeletonText mt={3}></SkeletonText>
+                                    <SkeletonText mt={3}></SkeletonText>
+                                </>
+                            )}
+
+                            <Text mt={3}>{eventData?.description}</Text>
                         </Box>
 
-                        <Text
-                            fontWeight="600"
-                            mt={3}
-                            fontSize="20"
-                            alignSelf="flex-end"
-                        >
-                            <FontAwesomeIcon
-                                icon={faTicketAlt}
-                                color="#805ad5"
-                            />
-                            <Text ml={2} display="inline" color="purple.500">
-                                {eventData.price.toLocaleString('pt-br', {
-                                    style: 'currency',
-                                    currency: 'BRL',
-                                })}
-                            </Text>
-                        </Text>
+                        {!eventData && <Skeleton height={70} width={'100%'} />}
 
-                        <Button
-                            mt={4}
-                            variant="solid"
-                            px={5}
-                            py={7}
-                            bg="purple.500"
-                            color="white"
-                            type="submit"
-                            _hover={{ bg: 'purple.700' }}
-                        >
-                            Quero um ingresso!
-                        </Button>
+                        {eventData && (
+                            <>
+                                <Text
+                                    fontWeight="600"
+                                    mt={3}
+                                    fontSize="20"
+                                    alignSelf="flex-end"
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faTicketAlt}
+                                        color="#805ad5"
+                                    />
+                                    <Text
+                                        ml={2}
+                                        display="inline"
+                                        color="purple.500"
+                                    >
+                                        {eventData?.price.toLocaleString(
+                                            'pt-br',
+                                            {
+                                                style: 'currency',
+                                                currency: 'BRL',
+                                            }
+                                        )}
+                                    </Text>
+                                </Text>
+
+                                <Button
+                                    mt={4}
+                                    variant="solid"
+                                    px={5}
+                                    py={7}
+                                    bg="purple.500"
+                                    color="white"
+                                    type="submit"
+                                    _hover={{ bg: 'purple.700' }}
+                                >
+                                    Quero um ingresso!
+                                </Button>
+                            </>
+                        )}
                     </Box>
                 </Box>
             </Box>
@@ -110,75 +133,48 @@ export const EventInformationContainer = ({ eventData }: Props) => {
 
                     <Divider my={5} />
 
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
+                    {!eventData &&
+                        new Array(10)
+                            .fill(null)
+                            .map(() => <SkeletonText mt={3}></SkeletonText>)}
 
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
-
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
-
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
-
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
-
-                    <Text>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Aliquam laboriosam nobis placeat, nostrum nesciunt
-                        maiores, cumque esse atque debitis ex quia provident
-                        doloribus ab officia quasi perspiciatis soluta, amet
-                        consequatur.
-                    </Text>
+                    <Box
+                        dangerouslySetInnerHTML={{
+                            __html: eventData?.about || '',
+                        }}
+                    ></Box>
                 </Box>
 
-                <Box width="30%">
+                {!eventData && (
+                    <Box width="30%">
+                        {new Array(3).fill(null).map(() => (
+                            <SkeletonText mt={7}></SkeletonText>
+                        ))}
+                    </Box>
+                )}
+
+                <Box width="30%" hidden={!eventData}>
                     <Box mb={5}>
                         <Heading size="sm" color="gray.400">
                             Data do Evento
                         </Heading>
-                        <Text>{moment(eventData.eventDate).format('lll')}</Text>
+                        <Text>
+                            {moment(eventData?.eventDate).format('lll')}
+                        </Text>
                     </Box>
 
                     <Box mb={5}>
                         <Heading size="sm" color="gray.400">
                             Número de Participantes
                         </Heading>
-                        <Text>{eventData.totalParticipants} pessoas</Text>
+                        <Text>{eventData?.totalParticipants} pessoas</Text>
                     </Box>
 
                     <Box mb={5}>
                         <Heading size="sm" color="gray.400">
                             Ingressos disponíveis
                         </Heading>
-                        <Text>{eventData.availableTickets} ingressos</Text>
+                        <Text>{eventData?.totalTickets} ingressos</Text>
                     </Box>
 
                     <Box mb={5}>
@@ -186,8 +182,8 @@ export const EventInformationContainer = ({ eventData }: Props) => {
                             Criado Por
                         </Heading>
                         <Text>
-                            {eventData.createdBy},{' '}
-                            {moment(eventData.createdAt).fromNow()}
+                            {eventData?.createdByUser?.name},{' '}
+                            {moment(eventData?.createdAt).fromNow()}
                         </Text>
                     </Box>
                 </Box>

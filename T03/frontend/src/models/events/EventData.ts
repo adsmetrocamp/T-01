@@ -1,3 +1,4 @@
+import { UserLoginResponse } from '../user/UserLoginResponse';
 import { EventCategory } from './EventCategory';
 
 export class EventData {
@@ -9,7 +10,9 @@ export class EventData {
     category!: EventCategory;
     availableTickets?: number;
     totalParticipants?: number;
+    totalTickets?: number;
     image?: string;
-    createdBy?: string;
+    createdByUser?: UserLoginResponse;
     createdAt?: Date;
+    about?: string;
 }

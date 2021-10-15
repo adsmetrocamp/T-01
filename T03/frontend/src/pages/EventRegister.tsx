@@ -77,7 +77,7 @@ export const EventRegister = (props: Props) => {
             });
 
             mutate<EventData[]>('/events', (ev) =>
-                ev ? [...ev, eventResponse.data] : undefined
+                ev ? [eventResponse.data, ...ev] : undefined
             );
 
             mutate<EventData>(

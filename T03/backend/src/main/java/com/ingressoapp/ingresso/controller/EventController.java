@@ -5,8 +5,10 @@ import com.ingressoapp.ingresso.dto.EventResponse;
 import com.ingressoapp.ingresso.dto.SimpleEventResponse;
 import com.ingressoapp.ingresso.model.Event;
 import com.ingressoapp.ingresso.model.EventCategory;
+import com.ingressoapp.ingresso.model.User;
 import com.ingressoapp.ingresso.repository.EventCategoryRepository;
 import com.ingressoapp.ingresso.repository.EventRepository;
+import com.ingressoapp.ingresso.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,9 @@ public class EventController {
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping()
     private List<SimpleEventResponse> getAllEvents() {
         return eventRepository.findAllByOrderByCreatedAtDesc().stream().map(SimpleEventResponse::toResponse)
@@ -46,9 +51,21 @@ public class EventController {
     }
 
     @PostMapping()
-    private EventResponse addEvent(@Valid @RequestBody EventRequest eventRequest) {
+    private EventResponse addEvent(
+            @Valid @RequestBody EventRequest eventRequest,
+            @RequestHeader("X-User-Id") UUID userId
+    ) {
         Event eventToCreate = eventRequest.toEvent();
         eventToCreate.setId(null);
+
+        // Try to find the requesting user
+        Optional<User> creatingUser = userRepository.findById(userId);
+
+        if (!creatingUser.isPresent()) {
+            throw new ValidationException("Não existe um usuário com ID " + userId);
+        }
+
+        eventToCreate.setCreatedByUser(creatingUser.get());
 
         Optional<EventCategory> findCategoryById = eventCategoryRepository.findById(eventRequest.getCategoryId());
 

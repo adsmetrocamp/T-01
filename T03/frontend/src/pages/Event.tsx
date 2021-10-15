@@ -1,24 +1,22 @@
 import React from 'react';
 import { BaseLayout } from '../components/Layouts/BaseLayout';
-import { Box, Text, Heading } from '@chakra-ui/react';
+import { Box, Text, Skeleton } from '@chakra-ui/react';
 import { EventInformationContainer } from '../components/Event/EventInformationContainer';
 import { EventData } from '../models/events/EventData';
+import useSWR from 'swr';
+import { useParams } from 'react-router';
+import EventService from '../services/EventService';
 
 interface Props {}
 
-const eventData: EventData = {
-    name: 'Meu evento',
-    category: { id: '1', name: 'Música' },
-    description: 'asdasd',
-    eventDate: new Date(),
-    id: '1',
-    price: 20.5,
-    availableTickets: 5,
-    totalParticipants: 10,
-    image: 'https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-};
-
 export const Event = (props: Props) => {
+    const { id } = useParams<{ id: string }>();
+
+    const { data: eventData } = useSWR<EventData>(
+        `/events/${id}`,
+        async () => (await EventService.getEventById(id)).data
+    );
+
     return (
         <BaseLayout>
             <Box display="flex" justifyContent="center">
@@ -33,13 +31,15 @@ export const Event = (props: Props) => {
                     zIndex={-1}
                 >
                     <Box
-                        bgImage={`url(${eventData.image})`}
+                        bgImage={`url(${eventData?.image})`}
                         width="100%"
                         height="100%"
                         bgSize="cover"
                         filter="blur(15px)"
                         bgPosition="center center"
-                    />
+                    >
+                        {!eventData && <Skeleton width="100%" height="100%" />}
+                    </Box>
                 </Box>
             </Box>
         </BaseLayout>

@@ -40,7 +40,7 @@ public class Event {
     @ManyToOne(cascade = CascadeType.ALL)
     private EventCategory category;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String about;
 
     @Column(nullable = false, columnDefinition = "LONGTEXT")
