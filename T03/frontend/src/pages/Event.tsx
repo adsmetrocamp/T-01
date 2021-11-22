@@ -4,7 +4,7 @@ import { Box, Text, Skeleton } from '@chakra-ui/react';
 import { EventInformationContainer } from '../components/Event/EventInformationContainer';
 import { EventData } from '../models/events/EventData';
 import useSWR from 'swr';
-import { useParams } from 'react-router';
+import { Redirect, useParams } from 'react-router';
 import EventService from '../services/EventService';
 
 interface Props {}
@@ -12,10 +12,14 @@ interface Props {}
 export const Event = (props: Props) => {
     const { id } = useParams<{ id: string }>();
 
-    const { data: eventData } = useSWR<EventData>(
+    const { data: eventData, error } = useSWR<EventData>(
         `/events/${id}`,
         async () => (await EventService.getEventById(id)).data
     );
+
+    if (error && !eventData) {
+        return <Redirect to="/" />;
+    }
 
     return (
         <BaseLayout>

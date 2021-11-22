@@ -6,10 +6,13 @@ import {
     faMoneyBill,
     faUsers,
     faTicketAlt,
+    faPen,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import moment from 'moment';
 import React from 'react';
+import { useHistory, useLocation, useRouteMatch } from 'react-router';
+import { useAuth } from '../../contexts/AuthContext';
 import { EventData } from '../../models/events/EventData';
 
 interface Props {
@@ -17,6 +20,20 @@ interface Props {
 }
 
 export const EventInformationContainer = ({ eventData }: Props) => {
+    const { loggedUser } = useAuth();
+
+    const history = useHistory();
+
+    const { pathname: path } = useLocation();
+
+    function handleGetTicket() {
+        if (!loggedUser) {
+            history.push('/login');
+        } else {
+            // TODO: open buy dialog
+        }
+    }
+
     return (
         <Box
             width="50%"
@@ -107,18 +124,44 @@ export const EventInformationContainer = ({ eventData }: Props) => {
                                     </Text>
                                 </Text>
 
-                                <Button
-                                    mt={4}
-                                    variant="solid"
-                                    px={5}
-                                    py={7}
-                                    bg="purple.500"
-                                    color="white"
-                                    type="submit"
-                                    _hover={{ bg: 'purple.700' }}
-                                >
-                                    Quero um ingresso!
-                                </Button>
+                                {!loggedUser ||
+                                loggedUser.id !==
+                                    eventData.createdByUser?.id ? (
+                                    <Button
+                                        mt={4}
+                                        variant="solid"
+                                        px={5}
+                                        py={7}
+                                        bg="purple.500"
+                                        color="white"
+                                        type="submit"
+                                        _hover={{ bg: 'purple.700' }}
+                                        onClick={handleGetTicket}
+                                    >
+                                        Quero um ingresso!
+                                    </Button>
+                                ) : (
+                                    <>
+                                        <Button
+                                            mt={4}
+                                            variant="solid"
+                                            px={5}
+                                            py={7}
+                                            bg="gray.500"
+                                            color="white"
+                                            type="submit"
+                                            _hover={{ bg: 'gray.700' }}
+                                            onClick={() => {
+                                                history.push(`${path}/edit`);
+                                            }}
+                                            leftIcon={
+                                                <FontAwesomeIcon icon={faPen} />
+                                            }
+                                        >
+                                            Editar esse evento
+                                        </Button>
+                                    </>
+                                )}
                             </>
                         )}
                     </Box>

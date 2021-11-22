@@ -18,6 +18,7 @@ export const AppRoutes = (props: Props) => {
                 <Route path="/" component={Home} exact />
                 <Route path="/event/register" component={EventRegister} exact />
                 <Route path="/event/:id" component={Event} exact />
+                <Route path="/event/:id/edit" component={EventRegister} exact />
                 <Route path="*" component={() => <Redirect to="/" />} />
             </Switch>
         </BrowserRouter>

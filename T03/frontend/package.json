@@ -28,6 +28,7 @@
     "cpf-cnpj-validator": "^1.0.3",
     "crypto-js": "^4.1.1",
     "draft-js": "^0.11.7",
+    "draft-js-import-html": "^1.4.1",
     "draftjs-to-html": "^0.9.1",
     "formik": "^2.2.9",
     "framer-motion": "4",

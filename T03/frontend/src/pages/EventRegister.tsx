@@ -1,11 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EventCard } from '../components/Home/EventCard';
 import { EventCategorySlider } from '../components/Home/EventCategorySlider';
 import { BaseLayout } from '../components/Layouts/BaseLayout';
 import { EventCategory } from '../models/events/EventCategory';
 import { EventData } from '../models/events/EventData';
 
-import { convertToRaw } from 'draft-js';
+import { convertToRaw, EditorState } from 'draft-js';
 
 import { useDropzone } from 'react-dropzone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,6 +32,7 @@ import { Editor } from 'react-draft-wysiwyg';
 
 import draftToHtml from 'draftjs-to-html';
 import htmlToDraft from 'html-to-draftjs';
+
 import { eventRegisterSchema } from '../utils/validators/events';
 import useSWR from 'swr';
 import EventCategoryService from '../services/EventCategoryService';
@@ -39,16 +40,36 @@ import EventService from '../services/EventService';
 import ErrorHandler from '../utils/ErrorHandler';
 import { useToast } from '@chakra-ui/react';
 import FileUtils from '../utils/FIleUtils';
-import { useHistory } from 'react-router';
+import { Redirect, useHistory, useParams } from 'react-router';
 import { mutate } from 'swr';
+import { AxiosResponse } from 'axios';
 import moment from 'moment';
+import { useAuth } from '../contexts/AuthContext';
+
+import { convertFromRaw, convertFromHTML } from 'draft-js';
+import { stateFromHTML } from 'draft-js-import-html';
 
 interface Props {}
 
 export const EventRegister = (props: Props) => {
+    const { loggedUser } = useAuth();
+
     const { data: categories } = useSWR<EventCategory[]>(
         '/events/categories',
         async () => (await EventCategoryService.getAllCategories()).data
+    );
+
+    // Editing ID
+    const { id } = useParams<{ id: string }>();
+
+    const { data: editingEventData } = useSWR<EventData>(
+        id ? `/events/${id}` : null,
+        async () => (await EventService.getEventById(id)).data,
+        {
+            revalidateIfStale: false,
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+        }
     );
 
     const history = useHistory();
@@ -61,31 +82,66 @@ export const EventRegister = (props: Props) => {
         validationSchema: eventRegisterSchema,
     });
 
+    useEffect(() => {
+        if (editingEventData) {
+            registerEventForm.resetForm({
+                values: {
+                    ...(editingEventData as any),
+                    categoryId: editingEventData.category.id as string,
+                    eventDate: new Date(editingEventData.eventDate),
+                },
+            });
+        }
+    }, [editingEventData]);
+
     async function submitEvent(event: EventRegisterFormType) {
         try {
-            const eventResponse = await EventService.createEvent({
+            const payload: EventRegisterFormType = {
                 ...event,
-                image: (await FileUtils.toBase64(
-                    event.image as File
-                )) as string,
-            });
+                image:
+                    typeof event.image !== 'string'
+                        ? ((await FileUtils.toBase64(
+                              event.image as File
+                          )) as string)
+                        : event.image,
+            };
 
-            toast({
-                title: 'Novo Evento',
-                description: 'O Evento foi cadastrado com sucesso',
-                status: 'success',
-            });
+            let eventResponse: AxiosResponse<EventData> = null as any;
 
-            mutate<EventData[]>('/events', (ev) =>
-                ev ? [eventResponse.data, ...ev] : undefined
-            );
+            if (!editingEventData) {
+                eventResponse = await EventService.createEvent(payload);
+
+                mutate<EventData[]>('/events', (ev) =>
+                    ev ? [eventResponse.data, ...ev] : undefined
+                );
+
+                toast({
+                    title: 'Novo Evento',
+                    description: 'O Evento foi cadastrado com sucesso',
+                    status: 'success',
+                });
+            } else {
+                eventResponse = await EventService.updateEvent(id, payload);
+
+                mutate<EventData[]>('/events', (ev) =>
+                    ev
+                        ? ev.map((e) => (e.id === id ? eventResponse.data : e))
+                        : undefined
+                );
+
+                toast({
+                    title: 'Evento editado',
+                    description: 'O Evento foi editado com sucesso',
+                    status: 'success',
+                });
+            }
 
             mutate<EventData>(
                 `/events/${eventResponse.data.id}`,
-                () => eventResponse.data
+                () => eventResponse?.data
             );
 
-            return history.push('/');
+            return history.push(`/event/${eventResponse.data.id}`);
         } catch (err) {
             ErrorHandler.handleError(err);
         }
@@ -105,10 +161,24 @@ export const EventRegister = (props: Props) => {
     const imageThumb = useMemo(() => {
         if (!registerEventForm.values.image) return null;
 
+        if (
+            typeof registerEventForm.values.image === 'string' &&
+            registerEventForm.values.image.includes('base64')
+        ) {
+            return registerEventForm.values.image;
+        }
+
         return `url(${window.URL.createObjectURL(
             registerEventForm.values.image
         )})`;
     }, [registerEventForm.values.image]);
+
+    const contentState = stateFromHTML(editingEventData?.about || '');
+    let editorState = EditorState.createWithContent(contentState);
+
+    if (!editingEventData?.about) {
+        editorState = EditorState.createEmpty();
+    }
 
     return (
         <BaseLayout>
@@ -116,7 +186,7 @@ export const EventRegister = (props: Props) => {
                 <Box pt={'80px'} px={'15%'} bgColor="#fff" pb={10}>
                     <Heading mb={10}>
                         <Heading display="inline" color="purple.500">
-                            Cadastrar
+                            {!!editingEventData ? 'Editar' : 'Cadastrar'}
                         </Heading>{' '}
                         Evento
                     </Heading>
@@ -134,7 +204,7 @@ export const EventRegister = (props: Props) => {
                         cursor="pointer"
                         opacity={dropzone.isDragActive ? 0.4 : 1}
                         {...dropzone.getRootProps()}
-                        bgImage={imageThumb ?? ''}
+                        bgImage={imageThumb ?? ('' as any)}
                         bgSize={'cover'}
                         bgPosition="center center"
                     >
@@ -358,6 +428,8 @@ export const EventRegister = (props: Props) => {
                                 paddingLeft: 20,
                             }}
                             onEditorStateChange={(e) => {
+                                console.log(e);
+
                                 registerEventForm.setFieldValue(
                                     'about',
                                     draftToHtml(
@@ -365,6 +437,7 @@ export const EventRegister = (props: Props) => {
                                     )
                                 );
                             }}
+                            defaultEditorState={editorState}
                         />
                     </Box>
 
